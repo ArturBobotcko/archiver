@@ -63,7 +63,7 @@ int def(FILE* source, FILE* dest, int level) {
     
     ProgressBar bar{
         option::BarWidth{80},
-        option::ForegroundColor{Color::white},
+        option::ForegroundColor{Color::green},
         option::FontStyles{std::vector<FontStyle>{FontStyle::bold}},
         option::MaxProgress{static_cast<size_t>(file_size)},
         option::Fill{"="},
@@ -158,7 +158,7 @@ int inf(FILE* source, FILE* dest) {
         option::Lead{"<==>"},
         option::End{"]"},
         option::PostfixText{"Extracting"},
-        option::ForegroundColor{Color::white},
+        option::ForegroundColor{Color::green},
         option::FontStyles{std::vector<FontStyle>{FontStyle::bold}},
     };
 

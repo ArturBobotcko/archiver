@@ -4,7 +4,7 @@ int main(int argc, char** argv) {
     int ret;
 
     if (argc < 4) {
-        fputs("archiver usage:\narchiver a <original file> <archive file> - to archive a file\narchiver e <archive file> <original file> - to extract a file", stderr);
+        fputs("archiver usage:\narchiver a <original file> <archive file> - to archive a file\narchiver e <archive file> <original file> - to extract a file\n", stderr);
         return 1;
     }
     else if (argc == 4) {
