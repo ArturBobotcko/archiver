@@ -1,7 +1,4 @@
-﻿// archiver.h : включаемый файл для стандартных системных включаемых файлов
-// или включаемые файлы для конкретного проекта.
-
-#pragma once
+﻿#pragma once
 
 #include <iostream>
 
@@ -11,6 +8,7 @@
 #include <cassert>
 #include <zlib.h>
 #include <string>
+#include <vector>
 
 #if defined(MSDOS) || defined(OS2) || defined(WIN32) || defined(__CYGWIN__)
 #  include <fcntl.h>

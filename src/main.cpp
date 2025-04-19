@@ -1,7 +1,6 @@
 #include "../include/archiver.h"
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
     int ret;
 
     if (argc < 4) {
@@ -11,13 +10,20 @@ int main(int argc, char** argv)
     }
     else if (argc == 4) {
         if (strcmp(argv[1], "a") == 0) {
-            FILE* original_file = fopen(argv[2], "rb");
-            FILE* archive_file = fopen(argv[3], "wb");
+            FILE* original_file;
+            FILE* archive_file;
+            
+            if (fopen_s(&original_file, argv[2], "rb") != 0) {
+                perror("Error opening original file");
+                return 1;
+            }
 
-            if (original_file == NULL) perror("Error opening original file");
-            if (archive_file == NULL) perror("Error opening archive file");
+            if (fopen_s(&archive_file, argv[3], "wb") != 0) {
+                perror("Error opening original file");
+                return 1;
+            }
 
-            int ret = def(original_file, archive_file, Z_DEFAULT_COMPRESSION);
+            ret = def(original_file, archive_file, Z_DEFAULT_COMPRESSION);
             if (ret != Z_OK) {
                 zerr(ret);
             }
@@ -26,13 +32,20 @@ int main(int argc, char** argv)
             fclose(archive_file);
         }
         else if (strcmp(argv[1], "e") == 0) {
-            FILE* archive_file = fopen(argv[2], "rb");
-            FILE* original_file = fopen(argv[3], "wb");
+            FILE* archive_file;
+            FILE* original_file; 
 
-            if (original_file == NULL) perror("Error opening original file");
-            if (archive_file == NULL) perror("Error opening archive file");
+            if (fopen_s(&archive_file, argv[2], "rb") != 0) {
+                perror("Error opening original file");
+                return 1;
+            }
 
-            int ret = inf(archive_file, original_file);
+            if (fopen_s(&original_file, argv[3], "wb") != 0) {
+                perror("Error opening original file");
+                return 1;
+            }
+
+            ret = inf(archive_file, original_file);
             if (ret != Z_OK) {
                 zerr(ret);
             }
