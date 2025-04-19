@@ -4,8 +4,7 @@ int main(int argc, char** argv) {
     int ret;
 
     if (argc < 4) {
-        fputs("archiver usage: archiver a <original file> <archive file> - to archive a file\n", stderr);
-        fputs("archiver usage: archiver e <archive file> <original file> - to extract a file", stderr);
+        fputs("archiver usage:\narchiver a <original file> <archive file> - to archive a file\narchiver e <archive file> <original file> - to extract a file", stderr);
         return 1;
     }
     else if (argc == 4) {
@@ -19,7 +18,7 @@ int main(int argc, char** argv) {
             }
 
             if (fopen_s(&archive_file, argv[3], "wb") != 0) {
-                perror("Error opening original file");
+                perror("Error opening archive file");
                 return 1;
             }
 
@@ -27,6 +26,8 @@ int main(int argc, char** argv) {
             if (ret != Z_OK) {
                 zerr(ret);
             }
+
+            cout << argv[2] << " was successfully archived to " << argv[3] << endl;
 
             fclose(original_file);
             fclose(archive_file);
@@ -36,7 +37,7 @@ int main(int argc, char** argv) {
             FILE* original_file; 
 
             if (fopen_s(&archive_file, argv[2], "rb") != 0) {
-                perror("Error opening original file");
+                perror("Error opening archive file");
                 return 1;
             }
 
@@ -49,6 +50,8 @@ int main(int argc, char** argv) {
             if (ret != Z_OK) {
                 zerr(ret);
             }
+
+            cout << argv[2] << " was successfully extracted to " << argv[3] << endl;
 
             fclose(archive_file);
             fclose(original_file);
