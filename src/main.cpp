@@ -9,15 +9,15 @@ int main(int argc, char** argv) {
     }
     else if (argc == 4) {
         if (strcmp(argv[1], "a") == 0) {
-            FILE* original_file;
-            FILE* archive_file;
+            FILE* original_file = fopen(argv[2], "rb");
+            FILE* archive_file = fopen(argv[3], "wb");
             
-            if (fopen_s(&original_file, argv[2], "rb") != 0) {
+            if (!original_file) {
                 perror("Error opening original file");
                 return 1;
             }
 
-            if (fopen_s(&archive_file, argv[3], "wb") != 0) {
+            if (!archive_file) {
                 perror("Error opening archive file");
                 return 1;
             }
@@ -33,15 +33,15 @@ int main(int argc, char** argv) {
             fclose(archive_file);
         }
         else if (strcmp(argv[1], "e") == 0) {
-            FILE* archive_file;
-            FILE* original_file; 
+            FILE* archive_file = fopen(argv[2], "rb");
+            FILE* original_file = fopen(argv[3], "wb");
 
-            if (fopen_s(&archive_file, argv[2], "rb") != 0) {
+            if (!archive_file) {
                 perror("Error opening archive file");
                 return 1;
             }
 
-            if (fopen_s(&original_file, argv[3], "wb") != 0) {
+            if (!original_file) {
                 perror("Error opening original file");
                 return 1;
             }
