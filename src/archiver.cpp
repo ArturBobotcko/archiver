@@ -1,6 +1,4 @@
 ﻿#include "../include/archiver.h"
-#include <indicators/cursor_control.hpp>
-#include <iomanip> // For percentage formatting
 
 // Function to get file size that works with large files
 int64_t get_file_size(FILE* file) {
@@ -151,22 +149,27 @@ int inf(FILE* source, FILE* dest) {
         return Z_ERRNO;
     }
     
-    std::cout << "File size: " << file_size << " bytes" << std::endl;
+    std::cout << "File size: " << format_bytes(file_size) << std::endl;
 
-    ProgressBar bar{
+    IndeterminateProgressBar bar{
         option::BarWidth{80},
+        option::Start{"["},
+        option::Fill{"·"},
+        option::Lead{"<==>"},
+        option::End{"]"},
+        option::PostfixText{"Extracting"},
         option::ForegroundColor{Color::white},
         option::FontStyles{std::vector<FontStyle>{FontStyle::bold}},
-        option::MaxProgress{static_cast<size_t>(file_size)},
-        option::Fill{"="},
-        option::Lead{">"},
-        option::Remainder{" "},
-        option::ShowPercentage{true},
-        option::ShowElapsedTime{true},
-        option::ShowRemainingTime{true},
     };
 
-    int64_t total_read = 0;
+    // Start a thread to update the indeterminate progress bar
+    std::atomic<bool> running{true};
+    std::thread progress_thread([&bar, &running]() {
+        while (running) {
+            bar.tick();
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+    });
 
     /* allocate inflate state */
     strm.zalloc = Z_NULL;
@@ -174,9 +177,15 @@ int inf(FILE* source, FILE* dest) {
     strm.opaque = Z_NULL;
     strm.avail_in = 0;
     strm.next_in = Z_NULL;
+
     ret = inflateInit(&strm);
+
     if (ret != Z_OK) {
+        running = false;
+        if (progress_thread.joinable()) progress_thread.join();
+
         show_console_cursor(true);
+
         return ret;
     }
 
@@ -185,14 +194,17 @@ int inf(FILE* source, FILE* dest) {
         strm.avail_in = static_cast<uInt>(fread(in.data(), 1, CHUNK, source));
         if (ferror(source)) {
             (void)inflateEnd(&strm);
+
+            running = false;
+            if (progress_thread.joinable()) progress_thread.join();
+
             show_console_cursor(true);
+
             return Z_ERRNO;
         }
         if (strm.avail_in == 0)
             break;
         strm.next_in = in.data();
-
-        total_read += strm.avail_in;
 
         /* run inflate() on input until output buffer not full */
         do {
@@ -207,31 +219,33 @@ int inf(FILE* source, FILE* dest) {
             case Z_DATA_ERROR:
             case Z_MEM_ERROR:
                 (void)inflateEnd(&strm);
+                running = false;
+                if (progress_thread.joinable()) progress_thread.join();
                 show_console_cursor(true);
                 return ret;
             }
+
             have = CHUNK - strm.avail_out;
             if (fwrite(out.data(), 1, have, dest) != have || ferror(dest)) {
                 (void)inflateEnd(&strm);
+                running = false;
+
+                if (progress_thread.joinable()) progress_thread.join();
+                
                 show_console_cursor(true);
                 return Z_ERRNO;
             }
         } while (strm.avail_out == 0);
 
-        bar.set_progress(static_cast<size_t>(total_read));
-
-        //if (total_read < file_size) {
-        //    bar.set_progress(static_cast<size_t>(total_read));
-        //    // No need to show byte counts for extraction
-        //}
-        //else {
-        //    bar.set_progress(static_cast<size_t>(file_size));
-        //    // No need to show byte counts for extraction
-        //}
-
         /* done when inflate() says it's done */
     } while (ret != Z_STREAM_END);
 
+    // Stop the progress bar thread
+    running = false;
+    if (progress_thread.joinable()) progress_thread.join();
+    
+    // Mark the progress bar as completed
+    bar.mark_as_completed();
     std::cout << std::endl;
 
     /* clean up and return */

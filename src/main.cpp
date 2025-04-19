@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
                 return 1;
             }
 
-            ret = def(original_file, archive_file, Z_DEFAULT_COMPRESSION);
+            ret = def(original_file, archive_file, 2);
             if (ret != Z_OK) {
                 zerr(ret);
             }
