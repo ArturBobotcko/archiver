@@ -8,7 +8,7 @@ endif()
 project("archiver")
 
 # Добавьте источник в исполняемый файл этого проекта.
-add_executable(archiver "archiver.cpp" "archiver.h")
+add_executable(archiver "src/archiver.cpp" "include/archiver.h" "src/main.cpp")
 
 if(CMAKE_VERSION VERSION_GREATER 3.12)
     set_property(TARGET archiver PROPERTY CXX_STANDARD 20)

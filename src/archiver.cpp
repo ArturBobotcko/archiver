@@ -1,28 +1,9 @@
 ﻿// archiver.cpp: определяет точку входа для приложения.
 //
 
-#include "archiver.h"
-#include <iostream>
-#include <fstream>
-#include <cstring>
-#include <cassert>
-#include <zlib.h>
-#include <string>
+#include "../include/archiver.h"
 
-#if defined(MSDOS) || defined(OS2) || defined(WIN32) || defined(__CYGWIN__)
-#  include <fcntl.h>
-#  include <io.h>
-#  define SET_BINARY_MODE(file) setmode(fileno(file), O_BINARY)
-#else
-#  define SET_BINARY_MODE(file)
-#endif
-
-using namespace std;
-
-#define CHUNK 16384
-
-int def(FILE* source, FILE* dest, int level)
-{
+int def(FILE* source, FILE* dest, int level) {
     int ret, flush;
     unsigned have;
     z_stream strm;
@@ -71,8 +52,7 @@ int def(FILE* source, FILE* dest, int level)
     return Z_OK;
 }
 
-int inf(FILE* source, FILE* dest)
-{
+int inf(FILE* source, FILE* dest) {
     int ret;
     unsigned have;
     z_stream strm;
@@ -151,48 +131,5 @@ void zerr(int ret) {
         break;
     case Z_VERSION_ERROR:
         fputs("zlib version mismatch!\n", stderr);
-    }
-}
-
-int main(int argc, char** argv)
-{
-    int ret;
-
-    if (argc < 4) {
-        fputs("archiver usage: archiver a <original file> <archive file> - to archive a file\n", stderr);
-        fputs("archiver usage: archiver e <archive file> <original file> - to extract a file", stderr);
-        return 1;
-    }
-    else if (argc == 4) {
-        if (strcmp(argv[1], "a") == 0) {
-            FILE* original_file = fopen(argv[2], "rb");
-            FILE* archive_file = fopen(argv[3], "wb");
-
-            if (original_file == NULL) perror("Error opening original file");
-            if (archive_file == NULL) perror("Error opening archive file");
-
-            int ret = def(original_file, archive_file, Z_DEFAULT_COMPRESSION);
-            if (ret != Z_OK) {
-                zerr(ret);
-            }
-
-            fclose(original_file);
-            fclose(archive_file);
-        }
-        else if (strcmp(argv[1], "e") == 0) {
-            FILE* archive_file = fopen(argv[2], "rb");
-            FILE* original_file = fopen(argv[3], "wb");
-
-            if (original_file == NULL) perror("Error opening original file");
-            if (archive_file == NULL) perror("Error opening archive file");
-
-            int ret = inf(archive_file, original_file);
-            if (ret != Z_OK) {
-                zerr(ret);
-            }
-
-            fclose(archive_file);
-            fclose(original_file);
-        }
     }
 }
